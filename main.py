@@ -9,6 +9,7 @@ import inquirer
 import csv
 import keyboard
 import cursor
+import datetime
 
 def submenu(columns,rows):
 	questions = [
@@ -28,53 +29,52 @@ def submenu(columns,rows):
 		cursor.hide()
 		os.system('cls')
 		wedstrijd_CSV_Export(filename,rows,columns)
-
 def wedstrijd_CSV_Export(naam, rijen, kolomnamen):
-    try:
-        with open(naam + ".csv", 'w', newline='') as csvfile:
-            csvdata = csv.writer(csvfile, delimiter=';')
-            csvdata.writerow(kolomnamen)
-            for rij in rijen:
-                csvdata.writerow(rij)
-        print(f"CSV file werd gemaakt met naam: {naam}.csv\n\n druk spatie terug te keren naar het hoofdmenu")
-        #onderstaande remap wordt toegepast omdat er een probleem voordoet bij het drukken op enter
-        #remap de enter toets naar space
-        keyboard.remap_key("enter", "space")
-        #wacht op een toetsdruk
-        keyboard.read_event()
-        #deactiveer de keymap
-        keyboard.unremap_key("enter")
-        #terug naar hoofdmenu
-        hoofdmenu()
-    except Exception as e:
-    	print(f"Er ging iets fout bij het creëren van de CSV file \n {e}")
+	try:
+		if os.path.isfile(naam + ".csv"):
+			print("de bestandsnaam is al gebruikt!")
+			bevestiging = [
+				inquirer.Confirm("Exit", message="Wil je de applicatie verlaten", default=False),
+			]
+			keuze = inquirer.prompt(bevestiging)
+		if keuze['Exit']==True:
+			os.system('cls')
+			quit()
+		with open(naam + ".csv", 'w', newline='') as csvfile:
+			csvdata = csv.writer(csvfile, delimiter=';')
+			csvdata.writerow(kolomnamen)
+			for rij in rijen:
+				csvdata.writerow(rij)
+		print(f"CSV file werd gemaakt met naam: {naam}.csv\n\n druk spatie terug te keren naar het hoofdmenu")
+		#onderstaande remap wordt toegepast omdat er een probleem voordoet bij het drukken op enter
+		#remap de enter toets naar space
+		keyboard.remap_key("enter", "space")
+		#wacht op een toetsdruk
+		keyboard.read_event()
+		#deactiveer de keymap
+		keyboard.unremap_key("enter")
+		#terug naar hoofdmenu
+		hoofdmenu()
+	except Exception as e:
+		print(f"Er ging iets fout bij het creëren van de CSV file \n {e}")
 def hoofdmenu():
 	cursor.hide()
 	os.system('cls')
 	questions = [
 	    inquirer.List(
 	        "Keuze",
-	        message="Welkom op de tool voor de database van Dames Volleybal West Vlaanderen?",
-	        choices=["Geplande Wedstrijden", "Alle Wedstrijden", "Export Wedstrijden naar CSV", "Voeg wedstrijdscore Toe", "Pas wedstrijdscore aan", "Verlaat applicatie"],
+	        message="Welkom op de tool voor de database van Dames Volleybal West-Vlaanderen",
+	        choices=["Geplande Wedstrijden", "Alle Wedstrijden", "Export Wedstrijden naar CSV", "Voeg wedstrijdscore toe", "Pas wedstrijdscore aan", "Verlaat applicatie"],
 	    ),
 	]
 	answers = inquirer.prompt(questions)
 	print(answers) #tijdelijk om keuze te weergeven
 	columns,rows = mydbservice()
 	if answers['Keuze'] == "Alle Wedstrijden":
-		os.system('cls')
-		print(tabulate.tabulate(rows, headers=columns, tablefmt="grid"))
-		submenu(columns,rows);
+		wedstrijdtabel(columns,rows)
+		submenu(columns,rows)
 	elif answers['Keuze'] == "Export Wedstrijden naar CSV":
-		os.system('cls')
-		cursor.show()		
-		inputtext = [
-			inquirer.Text("bestandsnaam", message="Kies een bestandsnaam voor de CSV export"),
-		]
-		enterdtext = inquirer.prompt(inputtext)
-		filename = enterdtext['bestandsnaam']
-		cursor.hide()
-		os.system('cls')
+		menukiesnaam("Kies een bestandsnaam voor de CSV export",rows,columns)
 		wedstrijd_CSV_Export(filename,rows,columns)
 	elif answers['Keuze'] == "Verlaat applicatie":
 		bevestiging = [
@@ -86,6 +86,19 @@ def hoofdmenu():
 			quit()
 		else:
 			hoofdmenu()
-
-		
-hoofdmenu()
+def wedstrijdtabel(columns,rows):
+	os.system('cls')
+	print(tabulate.tabulate(rows, headers=columns, tablefmt="grid"))
+def menukiesnaam(tekst,rows,columns):
+	os.system('cls')
+	cursor.show()
+	inputtext = [
+		inquirer.Text("bestandsnaam", message=tekst),
+	]
+	enterdtext = inquirer.prompt(inputtext)
+	filename = enterdtext['bestandsnaam']
+	cursor.hide()
+	os.system('cls')
+	wedstrijd_CSV_Export(filename,rows,columns)
+if __name__ == "__main__":	
+	hoofdmenu()
