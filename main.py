@@ -1,7 +1,9 @@
 from config import config as myconfig
 import sysconfig
 from services.general_services import print_env_var
-from services.db_service import lees_db as mydbservice
+from services.db_service import lees_match_db as mydbservice
+from services.object_to_dictionary import converteer_match_naar_tabel
+import models.match as mymatch
 import tabulate
 import os
 import sys
@@ -11,7 +13,36 @@ import keyboard
 import cursor
 import datetime
 
-def submenu(columns,rows):
+def hoofdmenu():
+	cursor.hide()
+	os.system('cls')
+	questions = [
+	    inquirer.List(
+	        "Keuze",
+	        message="Welkom op de tool voor de database van Dames Volleybal West-Vlaanderen",
+	        choices=["Geplande Wedstrijden", "Alle Wedstrijden", "Export Wedstrijden naar CSV", "Voeg wedstrijdscore toe", "Pas wedstrijdscore aan", "Verlaat applicatie"],
+	    ),
+	]
+	answers = inquirer.prompt(questions)
+	columns, rows, matchobjectlist =  mydbservice()
+	columnnames = list(vars(matchobjectlist[0]).keys())
+	if answers['Keuze'] == "Alle Wedstrijden":
+		wedstrijdtabel(matchobjectlist)
+		submenu(matchobjectlist)
+	elif answers['Keuze'] == "Export Wedstrijden naar CSV":
+		menukiesnaam("Kies een bestandsnaam voor de CSV export",rows,columns)
+		wedstrijd_CSV_Export(filename,rows,columns)
+	elif answers['Keuze'] == "Verlaat applicatie":
+		bevestiging = [
+			inquirer.Confirm("Exit", message="Wil je de applicatie verlaten", default=False),
+		]
+		keuze = inquirer.prompt(bevestiging)
+		if keuze['Exit']==True:
+			os.system('cls')
+			quit()
+		else:
+			hoofdmenu()
+def submenu(matchobjectlist):
 	questions = [
 	    inquirer.List(
 	        "Keuze",
@@ -65,38 +96,10 @@ def wedstrijd_CSV_Export(naam, rijen, kolomnamen):
 		hoofdmenu()
 	except Exception as e:
 		print(f"Er ging iets fout bij het creëren van de CSV file \n {e}")
-def hoofdmenu():
-	cursor.hide()
+def wedstrijdtabel(matchobjectlist):
 	os.system('cls')
-	questions = [
-	    inquirer.List(
-	        "Keuze",
-	        message="Welkom op de tool voor de database van Dames Volleybal West-Vlaanderen",
-	        choices=["Geplande Wedstrijden", "Alle Wedstrijden", "Export Wedstrijden naar CSV", "Voeg wedstrijdscore toe", "Pas wedstrijdscore aan", "Verlaat applicatie"],
-	    ),
-	]
-	answers = inquirer.prompt(questions)
-	print(answers) #tijdelijk om keuze te weergeven
-	columns,rows = mydbservice()
-	if answers['Keuze'] == "Alle Wedstrijden":
-		wedstrijdtabel(columns,rows)
-		submenu(columns,rows)
-	elif answers['Keuze'] == "Export Wedstrijden naar CSV":
-		menukiesnaam("Kies een bestandsnaam voor de CSV export",rows,columns)
-		wedstrijd_CSV_Export(filename,rows,columns)
-	elif answers['Keuze'] == "Verlaat applicatie":
-		bevestiging = [
-			inquirer.Confirm("Exit", message="Wil je de applicatie verlaten", default=False),
-		]
-		keuze = inquirer.prompt(bevestiging)
-		if keuze['Exit']==True:
-			os.system('cls')
-			quit()
-		else:
-			hoofdmenu()
-def wedstrijdtabel(columns,rows):
-	os.system('cls')
-	print(tabulate.tabulate(rows, headers=columns, tablefmt="grid"))
+	rows = converteer_match_naar_tabel(matchobjectlist)
+	print(tabulate.tabulate(rows, headers="keys", tablefmt="grid"))
 def menukiesnaam(tekst,rows,columns):
 	os.system('cls')
 	cursor.show()
