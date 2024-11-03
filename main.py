@@ -34,18 +34,26 @@ def wedstrijd_CSV_Export(naam, rijen, kolomnamen):
 		if os.path.isfile(naam + ".csv"):
 			print("de bestandsnaam is al gebruikt!")
 			bevestiging = [
-				inquirer.Confirm("Exit", message="Wil je de applicatie verlaten", default=False),
+				inquirer.Confirm("Confirm", message="Wil je het bestand overschrijven", default=False),
 			]
 			keuze = inquirer.prompt(bevestiging)
-		if keuze['Exit']==True:
-			os.system('cls')
-			quit()
-		with open(naam + ".csv", 'w', newline='') as csvfile:
-			csvdata = csv.writer(csvfile, delimiter=';')
-			csvdata.writerow(kolomnamen)
-			for rij in rijen:
-				csvdata.writerow(rij)
-		print(f"CSV file werd gemaakt met naam: {naam}.csv\n\n druk spatie terug te keren naar het hoofdmenu")
+			if keuze['Confirm']==False:
+				menukiesnaam("Kies een andere bestandsnaam voor de CSV export!",rijen,kolomnamen)
+			else:
+				with open(naam + ".csv", 'w', newline='') as csvfile:
+					csvdata = csv.writer(csvfile, delimiter=';')
+					csvdata.writerow(kolomnamen)
+					for rij in rijen:
+						csvdata.writerow(rij)
+				os.system('cls')
+				print(f"{naam}.csv werd overschreven!\n\n druk spatie terug te keren naar het hoofdmenu")
+		else:
+			with open(naam + ".csv", 'w', newline='') as csvfile:
+					csvdata = csv.writer(csvfile, delimiter=';')
+					csvdata.writerow(kolomnamen)
+					for rij in rijen:
+						csvdata.writerow(rij)
+					print(f"CSV file werd gemaakt met naam: {naam}.csv\n\n druk spatie terug te keren naar het hoofdmenu")
 		#onderstaande remap wordt toegepast omdat er een probleem voordoet bij het drukken op enter
 		#remap de enter toets naar space
 		keyboard.remap_key("enter", "space")
