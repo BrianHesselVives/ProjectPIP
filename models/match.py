@@ -1,10 +1,11 @@
+from datetime import datetime
 class match:
 	def __init__(self,score_thuis,score_bezoek,id_thuis,id_bezoek,datum,id_scheids,id_sporthal):
 		self.score_thuis = score_thuis
 		self.score_bezoek = score_bezoek
 		self.id_thuis = id_thuis
 		self.id_bezoek = id_bezoek
-		self.datum= datum
+		self.datum= datetime.strptime(datum, "%Y-%m-%d %H:%M")
 		self.id_scheids = id_scheids
 		self.id_sporthal = id_sporthal
 
