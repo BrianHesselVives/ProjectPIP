@@ -102,7 +102,16 @@ def wedstrijd_CSV_Export(naam, matchobjectlist, columnnames):
 			#ander naam kiezen
 			else:
 				filename = menukiesnaam("Kies een andere bestandsnaam voor de CSV export!", matchobjectlist, columnnames)
-				print(f"CSV file werd gemaakt met naam: {filename}.csv\n\n Druk op spatie om terug te keren naar het hoofdmenu")
+				while os.path.isfile(filename + ".csv") :
+					filename = menukiesnaam("Kies een andere bestandsnaam voor de CSV export!", matchobjectlist, columnnames)
+				with open(filename + ".csv", 'w', newline='') as csvfile:
+					csvdata = csv.writer(csvfile, delimiter=';')
+					csvdata.writerow(columnnames)
+					rows = converteer_match_naar_tabel(matchobjectlist)
+					for row in rows:
+						csvdata.writerow(list(row.values()))
+				os.system('cls')
+				print(f"CSV bestand werd gemaakt met naam: {filename}.csv\n\n Druk op spatie om terug te keren naar het hoofdmenu")
 		#bestand bestaat nog niet
 		else:
 			with open(naam + ".csv", 'w', newline='') as csvfile:
@@ -112,10 +121,10 @@ def wedstrijd_CSV_Export(naam, matchobjectlist, columnnames):
 				for row in rows:
 					csvdata.writerow(list(row.values()))
 				os.system('cls')
-				print(f"CSV file werd gemaakt met naam: {naam}.csv\n\n Druk op spatie om terug te keren naar het hoofdmenu")
+				print(f"CSV bestand werd gemaakt met naam: {naam}.csv\n\n Druk op spatie om terug te keren naar het hoofdmenu")
 		keyboard.wait("space")  #wacht tot de gebruiker op spatie drukt om door te gaan
 	except Exception as e:
-		print(f"Er ging iets fout bij het creëren van de CSV file: {e}")
+		print(f"Er ging iets fout bij het creëren van het CSV bestand: {e}")
 	finally:
 		hoofdmenu()  #keer terug naar het hoofdmenu
 def wedstrijdtabel(matchobjectlist):
