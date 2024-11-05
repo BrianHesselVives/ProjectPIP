@@ -223,6 +223,7 @@ def menukiesploegen():
 		os.system('cls')
 		mydbserviceScore(scoreThuis,scoreBezoek,idScheids,idSporthal,idThuis,idBezoek)
 		print(f"De score werd aangepast!\n\n Druk op spatie om terug te keren naar het hoofdmenu")
+		cursor.hide()
 		keyboard.wait("space")  #wacht tot de gebruiker op spatie drukt om door te gaan
 		hoofdmenu()
 	else:
