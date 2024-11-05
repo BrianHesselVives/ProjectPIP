@@ -11,13 +11,14 @@ Het aanpassen van de score kan gedaan worden door de menu's te doorlopen en de g
 ## Installatie van tool
 ### Database
 Om de database correct te laten werken, moet de naam van het databasebestand worden opgegeven via een .env-bestand dat je zelf aanmaakt. Dit bestand moet in de config folder komen te staan. In dit bestand voeg je de volgende variabele toe:
-
-├── config
-│   ├── __pycache__
-│   ├── .env
-│   ├── __init__.py
-│   ├── config.py
-
+```md
+.
+└── config/
+    ├── __pycache__
+    ├── .env
+    ├── config.py
+    └── __init__.py
+```      
 ```python
 DB_PATH="jouw_database_bestand"
 ```
