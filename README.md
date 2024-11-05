@@ -7,3 +7,16 @@ De CSV-bestanden worden opgeslagen in dezelfde map als het bestand main.py. Tijd
 ## Aanpassen van score
 Het aanpassen van de score kan gedaan worden door de menu's te doorlopen en de gewenste data in te geven.
 ![readme](https://github.com/user-attachments/assets/63fbaa4e-6957-4e7a-9d62-7ee1a6048189)
+
+Installatie van tool
+### Database
+Om de database correct te laten werken, moet de naam van het databasebestand worden opgegeven via een .env-bestand dat je zelf aanmaakt. In dit bestand voeg je de volgende variabele toe:
+
+
+```python
+DB_PATH="jouw_database_bestand"
+```
+Plaats de database in de hoofdmap, dezelfde map waarin main.py zich bevindt.
+
+### Vereiste packages
+Alle benodigde packages zijn te vinden in requirements.txt.
