@@ -1,11 +1,4 @@
 from config import config as myconfig
-import sysconfig
-from datetime import datetime
-from services.general_services import print_env_var
-from services.db_service import lees_match_db as mydbserviceMatch
-from services.db_service import lees_ploegen_in as mydbserviceClub
-from services.object_to_dictionary import converteer_match_naar_tabel
-from services.object_to_dictionary import converteer_club_naar_tabel
 import models.match as mymatch
 import tabulate
 import os
@@ -14,6 +7,18 @@ import inquirer
 import csv
 import keyboard
 import cursor
+import sysconfig
+from datetime import datetime
+from services.general_services import print_env_var
+from services.db_service import lees_match_db as mydbserviceMatch
+from services.db_service import lees_ploegen_in as mydbserviceClub
+from services.db_service import pass_score_aan as mydbserviceScore
+from services.db_service import lees_scheidsrechters_in as mydbserviceScheids
+from services.db_service import lees_score_in as mydbserviceLeesScore
+from services.object_to_dictionary import converteer_match_naar_tabel
+from services.object_to_dictionary import converteer_club_naar_tabel
+from services.object_to_dictionary import converteer_scheids_naar_tabel
+
 
 def hoofdmenu():
 	cursor.hide()
@@ -151,6 +156,7 @@ def menukiesploegen():
 	]
 	answers = inquirer.prompt(questions)	
 	bezoekploeg = answers['Bezoekploeg']
+
 	os.system('cls')
 	cursor.show()
 	questions = [
@@ -164,9 +170,58 @@ def menukiesploegen():
 			message="Geef de score voor de bezoekersploeg",
 			validate=score_validation,
 		),
+	]	
+	answers = inquirer.prompt(questions)
+	idThuis, idSporthal = find_ids(thuisploeg,rows)
+	idBezoek, idSporthalBezoek = find_ids(bezoekploeg,rows) #sporthal bezoek wordt niet gebruikt want de match gaat thuis door
+	scoreThuis = answers['score_thuis']
+	scoreBezoek = answers['score_bezoek']
+
+	os.system('cls')
+	scheidsobjectlist = mydbserviceScheids()
+	rows = converteer_scheids_naar_tabel(scheidsobjectlist)
+	questions = [
+	    inquirer.List(
+	        "Scheidsrechter",
+	        message="Kies scheidsrechter",
+	        choices=[row['VolwaardigeNaam'] for row in rows],
+	    ),
 	]
 	answers = inquirer.prompt(questions)
-	print(answers)
+	scheids = answers['Scheidsrechter']
+	idScheids = -1
+	for row in rows:
+		if row['VolwaardigeNaam']==answers['Scheidsrechter']:
+			idScheids = row['Id']
+	os.system('cls')
+	kolomnamen, tabeldata, matchobjectlist = mydbserviceLeesScore(idThuis,idBezoek)
+	rows = converteer_match_naar_tabel(matchobjectlist)
+	print(matchobjectlist[0].datum)
+
+	print("Aan te passen data:\n\nVan:")
+	print(tabulate.tabulate(rows, headers="keys", tablefmt="grid"))
+	aangepastMatch = [
+		["Datum", "Thuis", "Bezoek", "Score", "Sporthal", "Adres", "Scheidsrechter"],
+		[matchobjectlist[0].datum, thuisploeg, bezoekploeg, f"{scoreThuis} - {scoreBezoek}", matchobjectlist[0].sporthal, matchobjectlist[0].adres, scheids],
+	]	
+	print("\n\nNaar:")
+	print(tabulate.tabulate(aangepastMatch, headers="firstrow", tablefmt="grid"))
+	bevestiging = [
+				inquirer.Confirm("Confirm", message="Wil je het de score wijzigen?"),
+			]
+	keuze = inquirer.prompt(bevestiging)
+	if keuze['Confirm']:
+		os.system('cls')
+		mydbserviceScore(scoreThuis,scoreBezoek,idScheids,idSporthal,idThuis,idBezoek)
+		print(f"De score werd aangepast!\n\n Druk op spatie om terug te keren naar het hoofdmenu")
+		keyboard.wait("space")  #wacht tot de gebruiker op spatie drukt om door te gaan
+		hoofdmenu()
+	else:
+		hoofdmenu()
+def find_ids(ploegnaam,rows):
+	for row in rows:
+		if row['Naam']==ploegnaam:
+			return row['Id'], row['Idsporthal']
 def score_validation(answers, current):
 	try:
 		value = int(current)
