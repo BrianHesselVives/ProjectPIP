@@ -185,7 +185,7 @@ def menukiesploegen():
 	idBezoek, idSporthalBezoek = find_ids(bezoekploeg,rows) #sporthal bezoek wordt niet gebruikt want de match gaat thuis door
 	scoreThuis = answers['score_thuis']
 	scoreBezoek = answers['score_bezoek']
-
+	cursor.hide()
 	os.system('cls')
 	scheidsobjectlist = mydbserviceScheids()
 	rows = converteer_scheids_naar_tabel(scheidsobjectlist)
@@ -205,8 +205,7 @@ def menukiesploegen():
 	os.system('cls')
 	kolomnamen, tabeldata, matchobjectlist = mydbserviceLeesScore(idThuis,idBezoek)
 	rows = converteer_match_naar_tabel(matchobjectlist)
-	print(matchobjectlist[0].datum)
-
+	cursor.show()
 	print("Aan te passen data:\n\nVan:")
 	print(tabulate.tabulate(rows, headers="keys", tablefmt="grid"))
 	aangepastMatch = [
